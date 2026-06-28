@@ -1,10 +1,6 @@
 # 🌟 Pixel  🌟
 
 <p align="center">
-  <img src="./Screenshot 2026-06-28 204939.jpg" alt="Pixel Photobooth Preview" width="100%">
-</p>
-
-<p align="center">
   <strong>✨ Capture your moments with us! ✨</strong><br>
   A retro, Y2K-inspired digital arcade photobooth built with a flashy, game-like aesthetic. 
 </p>
