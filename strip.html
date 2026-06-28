@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Photostrip</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --pink: #ff2d95;
+            --hotpink: #ff66b2;
+            --black: #050406;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, var(--black) 0%, #0b0b0d 100%);
+            font-family: 'Bitcount Grid Double', system-ui, sans-serif;
+            color: var(--hotpink);
+            cursor: url('cursor.png'), auto;
+        }
+        .container {
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+        }
+        h1 {
+            color: var(--pink);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .strip-display {
+            background: rgba(255, 45, 149, 0.03);
+            padding: 12px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 45, 149, 0.12);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            margin-bottom: 20px;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+            max-height: 75vh;
+            display: block;
+            margin: 0 auto;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            cursor: url('cursor.png'), auto;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            border: 0;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: url('cursor.png'), auto;
+            text-decoration: none;
+            text-align: center;
+            font-family: inherit;
+            cursor:url('cursor.png'), auto;
+        }
+        .btn-download {
+            background: linear-gradient(90deg, var(--pink), #ff5aa0);
+            color: #0b0b0d;
+            cursor: url('cursor.png'), auto;
+        }
+        .btn-download:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .btn-back {
+            background: transparent;
+            border: 2px dashed rgba(255, 45, 149, 0.3);
+            color: var(--hotpink);
+            cursor: url('cursor.png'), auto;
+        }
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--pink);
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div image="background">
+       <image src="bg2.png" style="width:100%;height:100%;position:fixed;top:0;left:0;z-index:-1;">
+    </image></div>
+    <div class="container">
+        <h1>Your Photostrip</h1>
+        
+        <div id="loading" class="loading-text">Building your photostrip...</div>
+
+        <div class="strip-display" id="displayCard" style="display: none;">
+            <canvas id="stripCanvas"></canvas>
+        </div>
+
+        <div class="btn-group">
+            <a href="photobooth.html" class="btn btn-back">⬅ Retake</a>
+            <button id="downloadBtn" type="button" class="btn btn-download" disabled>Download Strip</button>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            // #region agent log
+            const dbgLog = (location, message, data, hypothesisId) => {
+                fetch('http://127.0.0.1:7499/ingest/5ff8eada-f261-496a-a862-5b3cb022b339',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'43392b'},body:JSON.stringify({sessionId:'43392b',location,message,data,timestamp:Date.now(),hypothesisId})}).catch(()=>{});
+            };
+            // #endregion
+
+            const THEME = {
+                pink: '#ff2d95',
+                hotpink: '#ff66b2',
+                black: '#050406',
+                dark: '#0b0b0d'
+            };
+
+            const STRIP_W = 320;
+            const PAD = 18;
+            const BORDER = 5;
+            const SLOT = 220;
+            const GAP = 16;
+            const HEADER = 52;
+            const FOOTER = 72;
+            const STRIP_H = PAD * 2 + HEADER + FOOTER + 4 * SLOT + 3 * GAP;
+
+            const rawData = sessionStorage.getItem('photostrip_photos');
+            if (!rawData) {
+                window.location.href = 'photobooth.html';
+                return;
+            }
+
+            const photos = JSON.parse(rawData);
+            const canvas = document.getElementById('stripCanvas');
+            const ctx = canvas.getContext('2d');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            canvas.width = STRIP_W;
+            canvas.height = STRIP_H;
+
+            const slotX = Math.floor((STRIP_W - SLOT) / 2);
+            const positions = Array.from({ length: 4 }, (_, i) => ({
+                x: slotX,
+                y: PAD + HEADER + i * (SLOT + GAP),
+                w: SLOT,
+                h: SLOT
+            }));
+
+            const drawCover = (ctx, img, dx, dy, dw, dh) => {
+                const slotRatio = dw / dh;
+                const imgRatio = img.width / img.height;
+                let sx, sy, sw, sh;
+                if (imgRatio > slotRatio) {
+                    sh = img.height;
+                    sw = img.height * slotRatio;
+                    sx = (img.width - sw) / 2;
+                    sy = 0;
+                } else {
+                    sw = img.width;
+                    sh = img.width / slotRatio;
+                    sx = 0;
+                    sy = (img.height - sh) / 2;
+                }
+                ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+            };
+
+            const drawSprockets = (ctx, yStart, yEnd) => {
+                ctx.fillStyle = THEME.black;
+                const cxLeft = PAD + 7;
+                const cxRight = STRIP_W - PAD - 7;
+                for (let y = yStart + 10; y < yEnd - 6; y += 22) {
+                    ctx.beginPath();
+                    ctx.arc(cxLeft, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(cxRight, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            };
+
+            const drawFrame = (ctx) => {
+                ctx.fillStyle = THEME.black;
+                ctx.fillRect(0, 0, STRIP_W, STRIP_H);
+
+                const bodyX = PAD;
+                const bodyY = PAD;
+                const bodyW = STRIP_W - PAD * 2;
+                const bodyH = STRIP_H - PAD * 2;
+
+                const grad = ctx.createLinearGradient(0, 0, STRIP_W, STRIP_H);
+                grad.addColorStop(0, THEME.pink);
+                grad.addColorStop(1, THEME.hotpink);
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.roundRect(bodyX, bodyY, bodyW, bodyH, 14);
+                ctx.fill();
+
+                ctx.fillStyle = THEME.dark;
+                ctx.beginPath();
+                ctx.roundRect(bodyX + BORDER, bodyY + BORDER, bodyW - BORDER * 2, bodyH - BORDER * 2, 10);
+                ctx.fill();
+
+                drawSprockets(ctx, bodyY, bodyY + bodyH);
+            };
+
+            const drawOverlay = (ctx) => {
+                ctx.fillStyle = THEME.pink;
+                ctx.font = 'bold 18px "Bitcount Grid Double", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('Y2K PHOTOSTRIP', STRIP_W / 2, PAD + 34);
+
+                positions.forEach((pos) => {
+                    ctx.strokeStyle = 'rgba(255, 45, 149, 0.55)';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(pos.x - 1, pos.y - 1, pos.w + 2, pos.h + 2);
+                });
+
+                const footerY = STRIP_H - PAD - FOOTER + 28;
+                ctx.font = '22px serif';
+                ctx.fillText('✦ ✧ ✦ ✧', STRIP_W / 2, footerY);
+            };
+
+            const finishStrip = (loadedImages) => {
+                drawFrame(ctx);
+                loadedImages.forEach((img, idx) => {
+                    if (img && positions[idx]) {
+                        drawCover(ctx, img, positions[idx].x, positions[idx].y, positions[idx].w, positions[idx].h);
+                    }
+                });
+                drawOverlay(ctx);
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('displayCard').style.display = 'block';
+
+                const dataUrl = canvas.toDataURL('image/png');
+                downloadBtn.disabled = false;
+                downloadBtn.onclick = () => {
+                    const link = document.createElement('a');
+                    link.href = dataUrl;
+                    link.download = 'y2k-photostrip.png';
+                    link.click();
+                };
+
+                // #region agent log
+                dbgLog('strip.html:complete', 'Photostrip built', {
+                    photoCount: photos.length,
+                    canvasW: STRIP_W,
+                    canvasH: STRIP_H,
+                    positions,
+                    downloadEnabled: true
+                }, 'F');
+                // #endregion
+            };
+
+            // #region agent log
+            dbgLog('strip.html:start', 'Building programmatic strip', {
+                photoCount: photos.length,
+                positions
+            }, 'F');
+            // #endregion
+
+            ctx.fillStyle = THEME.black;
+            ctx.fillRect(0, 0, STRIP_W, STRIP_H);
+
+            const slotCount = Math.min(photos.length, 4);
+            const loadedImages = new Array(slotCount);
+            let loadedCount = 0;
+            let failed = false;
+
+            photos.slice(0, 4).forEach((photoData, idx) => {
+                const img = new Image();
+                img.onload = () => {
+                    loadedImages[idx] = img;
+                    loadedCount++;
+
+                    // #region agent log
+                    dbgLog('strip.html:drawPhoto', 'Photo loaded for slot', {
+                        idx,
+                        imgWidth: img.width,
+                        imgHeight: img.height,
+                        pos: positions[idx]
+                    }, 'F');
+                    // #endregion
+
+                    if (loadedCount === slotCount && !failed) {
+                        finishStrip(loadedImages);
+                    }
+                };
+                img.onerror = () => {
+                    failed = true;
+                    document.getElementById('loading').textContent = 'Could not load a captured photo. Please retake.';
+                    // #region agent log
+                    dbgLog('strip.html:photoError', 'Photo load failed', { idx }, 'F');
+                    // #endregion
+                };
+                img.src = photoData;
+            });
+        });
+    </script>
+</body>
+</html>

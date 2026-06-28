@@ -1,0 +1,89 @@
+
+.bitcount-grid-double-uniquifier {
+  font-family: "Bitcount Grid Double", system-ui;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "slnt" 0,
+    "CRSV" 0.5,
+    "ELSH" 0,
+    "ELXP" 0;
+}
+
+
+#root{--pink:#ff2d95;--hotpink:#ff66b2;--black:#050406}
+body {
+    background-size: cover;
+    align-items: center;
+    text-align: center;
+    color: var(--hotpink);
+    cursor: url('cursor.png'), auto;
+}
+.content  {
+    color: var(--pink);
+    font-size: 36px;
+    margin-top: 50px;
+    font-family: 'Bitcount Grid Double', system-ui;
+    text-shadow: 4px 4px 4px #FF66CC;
+}
+#bg-video {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: -1;  
+}
+.photobooth-button{
+    border: 2px solid #FF66CC;
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-right: 10px;    
+    border-radius: 8px;
+    font-family: 'Bitcount Grid Double', system-ui;
+    align-items: center;
+    text-align: center;
+    -webkit-background-clip: text;
+    filter: drop-shadow(2px 2px 0px #000);
+    cursor: url('cursor.png'), auto;
+}
+.gradient-photobooth-button {
+  background: linear-gradient(45deg, #000000, #ff69b4); /* Transitions from red to blue */
+  color: white;
+}
+.photobooth-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+
+.photobooth-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px #000; /* Flattens down when clicked */
+}
+.content h1{
+    color: #FF66CC;
+    font-size: 80px;
+    font-family: 'Bitcount Grid Double', system-ui;
+    align-items: center;
+    text-align: center;
+    top: 50%;
+    text-shadow: 3px 3px 0px #bc1283;
+    background: linear-gradient(to bottom, #fff 0%, #ff69b4 100%);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   filter: drop-shadow(2px 2px 0px #FF66CC);
+}
+.content h3{
+    font-size: 24px;
+    margin-top: 20px;
+    font-family: 'Bitcount Grid Double', system-ui;
+    align-items: center;
+    color: #FF66CC;
+    text-align: center;
+    text-shadow: 3px 3px 0px #bc1283;
+    background: linear-gradient(to bottom, #fff 0%, #ff69b4 100%);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   filter: drop-shadow(2px 2px 0px #FF66CC);
+}
