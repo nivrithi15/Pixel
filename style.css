@@ -27,7 +27,7 @@ body {
     font-family: 'Bitcount Grid Double', system-ui;
     text-shadow: 4px 4px 4px #FF66CC;
 }
-.bg-video {
+#bg-video {
     position: fixed;
     right: 0;
     bottom: 0;
