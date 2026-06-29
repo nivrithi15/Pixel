@@ -182,3 +182,25 @@ video.preview {
   color: var(--pink);
   font-family: inherit;
 }
+.sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: #ff69b4; /* Hot pink glitter */
+  box-shadow: 0 0 4px #ffb6c1; /* Soft neon glow */
+  pointer-events: none; /* Crucial so it doesn't block clicking things */
+  border-radius: 0px; /* 0px for retro pixel square, 50% for tiny fairy dots */
+  transform: translate(-50%, -50%);
+  animation: fadeOut 0.8s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.2) rotate(180deg);
+    opacity: 0;
+  }
+}
