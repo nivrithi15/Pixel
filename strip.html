@@ -89,6 +89,28 @@
             color: var(--pink);
             margin: 40px 0;
         }
+        .sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: #ff69b4; /* Hot pink glitter */
+  box-shadow: 0 0 4px #ffb6c1; /* Soft neon glow */
+  pointer-events: none; /* Crucial so it doesn't block clicking things */
+  border-radius: 0px; /* 0px for retro pixel square, 50% for tiny fairy dots */
+  transform: translate(-50%, -50%);
+  animation: fadeOut 0.8s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.2) rotate(180deg);
+    opacity: 0;
+  }
+}
     </style>
 </head>
 <body>
@@ -306,6 +328,32 @@
                 img.src = photoData;
             });
         });
+        document.addEventListener('mousemove', (e) => {
+  // Create a sparkle element
+  const sparkle = document.createElement('div');
+  sparkle.className = 'sparkle';
+  
+  // Set position directly at the cursor
+  sparkle.style.left = `${e.pageX}px`;
+  sparkle.style.top = `${e.pageY}px`;
+  
+  // Give it a tiny bit of random drift for a floaty effect
+  const randomX = (Math.random() - 0.5) * 20;
+  const randomY = (Math.random() - 0.5) * 20;
+  sparkle.style.setProperty('--driftX', `${randomX}px`);
+  sparkle.style.setProperty('--driftY', `${randomY}px`);
+
+  // Randomly alternate colors between hot pink, baby pink, and white
+  const colors = ['#ff69b4', '#ffb6c1', '#ffffff', '#ff1493'];
+  sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+  document.body.appendChild(sparkle);
+  
+  // Clean up the element from the DOM after the animation finishes
+  setTimeout(() => {
+    sparkle.remove();
+  }, 800);
+});
     </script>
 </body>
 </html>
