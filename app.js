@@ -143,4 +143,5 @@
 
   window.addEventListener('beforeunload', () => {
     if (streamRef) streamRef.getTracks().forEach(t => t.stop());
+  });
 })();
