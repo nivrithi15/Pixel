@@ -1,4 +1,6 @@
-# Pixel-Your Photobooth
+<h1 align="center">
+<bold>Pixel-Your Photobooth</bold>
+</h1>
 
 <p align="center">
   <strong>Capture your moments with us!</strong><br>
