@@ -144,4 +144,29 @@
   window.addEventListener('beforeunload', () => {
     if (streamRef) streamRef.getTracks().forEach(t => t.stop());
   });
+  document.addEventListener('mousemove', (e) => {
+  // Create a sparkle element
+  const sparkle = document.createElement('div');
+  sparkle.className = 'sparkle';
+  
+  // Set position directly at the cursor
+  sparkle.style.left = `${e.pageX}px`;
+  sparkle.style.top = `${e.pageY}px`;
+  
+  // Give it a tiny bit of random drift for a floaty effect
+  const randomX = (Math.random() - 0.5) * 20;
+  const randomY = (Math.random() - 0.5) * 20;
+  sparkle.style.setProperty('--driftX', `${randomX}px`);
+  sparkle.style.setProperty('--driftY', `${randomY}px`);
+
+  // Randomly alternate colors between hot pink, baby pink, and white
+  const colors = ['#ff69b4', '#ffb6c1', '#ffffff', '#ff1493'];
+  sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+  document.body.appendChild(sparkle);
+  
+  // Clean up the element from the DOM after the animation finishes
+  setTimeout(() => {
+    sparkle.remove();
+  }, 800);
 })();
