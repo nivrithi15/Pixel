@@ -11,7 +11,7 @@
 
 ## Features
 
-* ** Retro Star Matrix UI:** Dynamic, moving matrix background that brings arcade nostalgia straight to your browser.
+* **Retro Star Matrix UI:** Dynamic, moving matrix background that brings arcade nostalgia straight to your browser.
 * **Custom Photostrip Generation:** Snap your pictures and compile them seamlessly into a classic digital filmstrip layout.
 * **Y2K Aesthetic:** Complete with pixel typography, vibrant pink/neon themes, custom retro mouse cursors, and 3D arcade-style UI elements.
 * **Instant Downloads:** Save your custom compiled photostrips straight to your local device with a single click.
